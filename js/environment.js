@@ -1,25 +1,33 @@
 class Environment {
-  constructor(p, v) {
-    this.pop = p;
-    this.veg = v;
+  constructor(population, allFood) {
+    this.pop = population;
+    this.foodArr = allFood;
   }
   show() {
     this.pop.show();
-    this.veg.show(this.pop);
+    for (let foodGroup of this.foodArr) {
+      foodGroup.show(this.pop);
+    }
   }
   update() {
     this.pop.update();
-    this.veg.update(this.pop);
+    for (let foodGroup of this.foodArr) {
+      foodGroup.update(this.pop);
+    }
     this.overLapFood();
   }
 
+  //FoodGroup should determine what happens when a Specie interacts with it, not Environment, although you can write switch conditional logic here for now
+
   overLapFood() {
     for (let specie of this.pop.arr) {
-      for (let f of this.veg.arr) {
-        if (specie.intersects(f)) {
-          specie.energy += 1000;
-          f.rad = f.rad / 2;
-          break;
+      for (let foodGroup of this.foodArr) {
+        for (let food of foodGroup.arr) {
+          if (specie.intersects(food)) {
+            specie.energy += 1000;
+            food.rad = food.rad / 2;
+            break;
+          }
         }
       }
     }

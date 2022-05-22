@@ -1,12 +1,13 @@
-class Vegetation {
-  constructor(f, c) {
-    this.classFood = f;
+class FoodGroup {
+  constructor(n, f, c) {
+    this.name = n;
+    this._Food = f;
     this.col = c;
     this.arr = [];
   }
   show(pop) {
-    for (let i = 0; i < floor(pop.total / 2); i++) {
-      this.arr[i] = new this.classFood(random(15, 35), 100, this.col);
+    for (let i = 0; i < ceil(pop.total / 2); i++) {
+      this.arr[i] = new this._Food(random(15, 35), 100, this.col);
     }
   }
   update(pop) {

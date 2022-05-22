@@ -32,20 +32,8 @@ class Population {
       specie.show();
       specie.update();
       this.overLapOther(specie);
-      // this.overLapFood(food);
     }
   }
-  // overLapFood(food) {
-  //   for (let specie of this.arr) {
-  //     for (let f of food) {
-  //       if (specie.intersects(f)) {
-  //         specie.energy += 1000;
-  //         f.rad = f.rad / 2;
-  //         break;
-  //       }
-  //     }
-  //   }
-  // }
   overLapOther(other) {
     let overlap = false;
     for (let specie of this.arr) {
