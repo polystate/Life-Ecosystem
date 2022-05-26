@@ -1,27 +1,22 @@
 class Worm {
-  constructor(pos, wid, hei, vel, rad, col = 0, alpha = 30) {
-    //core traits
+  constructor(pos, wid, hei, rad, col = 0, alpha = 30) {
+    //variant or inherited traits
     this.pos = pos;
     this.wid = wid;
     this.hei = hei;
-    this.vel = vel;
     this.rad = rad;
-
-    this.wanderTheta = 360; //before pi/2
-
-    //additional traits
-    this.acc = p5.Vector.random2D();
-    this.area = this.wid * this.hei;
-    this.perim = 2 * (this.wid + this.hei);
-    this.sight = sqrt(this.area / this.rad);
-    this.health = this.area * 2;
+    //default traits or blank slate
+    this.vel = createVector(0, 0);
+    this.acc = createVector(0, 0);
+    //computed traits based on inherited
+    this.mass = this.wid * this.hei;
+    this.sight = sqrt((this.wid * this.hei) / this.rad);
+    this.health = this.wid * this.hei;
     this.life = this.health / 2;
-    // this.acc.mult(random(1.5));
     this.col = col;
     this.alp = alpha;
-    this.maxSpeed = 1.5;
-    this.angV = p5.Vector.random2D();
-    this.angV.mult(random(-3, 3), random(-3, 3));
+    this.maxSpeed = 2; //lower the mass the higher the cap
+    this.wanderTheta = PI / 2; //before pi/2
   }
   show() {
     push();
@@ -29,38 +24,30 @@ class Worm {
     noStroke();
     fill(this.col, this.alp);
     translate(this.pos.x, this.pos.y);
-    let degrees = this.vel.heading();
-    this.angV.mult(this.vel);
-    rotate(degrees);
-    if (this.health < 1000) {
-      this.maxSpeed = 2;
-      // this.twitch(degrees);
-    }
-    // else {
+    rotate(this.vel.heading());
+    // if (this.health < 1000) {
+    //   this.maxSpeed = 2;
+    //   this.twitch(this.vel.heading());
+    // } else {
     //   this.phenotype("gold");
     // }
-
     rect(0, 0, this.wid, this.hei, this.rad);
     pop();
-
-    //default content mood color. eyesight strength controlled by PUPIL SIZE or strokeWeight, blue being the happiest
-    //what we need to figure out is what is its sign determined by, 8 is the current hardcoded value, but it should be determined by the parameters already thrown into the constructor, we also want its pupil to move around independently so that it can look around in any direction and have some degree of sight of what's happening behind it or ahead of it etc, this is better than sensors and is worth spending more time on
-    this.eye("white", this.sight);
+    this.eye("lightblue", this.sight);
+    // this.vision("lightblue", 20, 20);
+    //gold looks really cool as an eye laser
+    this.arm();
   }
 
   update() {
-    //any CHANGES in animation when it dies to its eye or color has to be done through _Population
     this.boundaries();
-    this.pos.add(this.vel);
-    if (this.hasEnergy()) {
-      // this.applyForce();
+    // this.pos.add(this.vel);
+    if (this.hasHealth()) {
+      this.applyForce(p5.Vector.random2D());
       this.vel.add(this.acc);
       this.pos.add(this.vel);
-
-      this.wander();
-      this.acc.limit(this.maxSpeed);
       this.vel.limit(this.maxSpeed);
-    } else if (!this.hasEnergy()) {
+    } else if (!this.hasHealth()) {
       fill(0, 255);
       if (this.rad > 1.5) {
         this.rad -= 0.01;
@@ -71,11 +58,16 @@ class Worm {
       this.hei -= 0.01;
     } else if (!this.isAlive()) {
       if (this.wid > 0 || this.hei > 0) {
-        // console.log(this + " is dead.");
         this.wid--;
         this.hei--;
       }
     }
+  }
+
+  applyForce(forceVect) {
+    let force = forceVect.copy();
+    force.div(this.mass);
+    this.acc.add(force);
   }
 
   phenotype(col) {
@@ -83,20 +75,15 @@ class Worm {
     let offset = 0;
     stroke(col);
     strokeWeight(5);
-    point(this.hei, 0); //on its head
+    point(this.hei, 0);
     point(this.hei, this.hei);
     point(this.hei, -this.hei);
-    let vantagePoint = this.hei + this.wid / this.sight; //before this was * degrees, + this.rad is interesting because it reflects their vision/vantagePoint, this.rad or their vantage point should shift over time as a variable absed on direction they are looking and eyesight
+    let vantagePoint = this.hei + this.wid / this.sight;
     point(vantagePoint, offset);
     point(offset, vantagePoint);
     point(-vantagePoint, offset);
     point(offset, -vantagePoint);
     pop();
-  }
-
-  applyForce(vect) {
-    // let force = p5.Vector.random2D();
-    this.acc.add(vect);
   }
 
   wander() {
@@ -107,22 +94,18 @@ class Worm {
     //setMag to neared spotted food based on sight
     wanderPoint.add(this.pos);
     fill(255, 0, 0);
-    circle(wanderPoint.x, wanderPoint.y, 16);
-
+    // circle(wanderPoint.x, wanderPoint.y, 16);
     let wanderRadius = 50;
     noFill();
-    circle(wanderPoint.x, wanderPoint.y, wanderRadius);
-
+    // circle(wanderPoint.x, wanderPoint.y, wanderRadius);
     let theta = this.wanderTheta + this.vel.heading();
     let x = wanderRadius * cos(theta);
     let y = wanderRadius * sin(theta);
     fill(0, 255, 0);
     noStroke();
     wanderPoint.add(x, y);
-    circle(wanderPoint.x, wanderPoint.y, 16);
-
+    // circle(wanderPoint.x, wanderPoint.y, 16);
     let steer = wanderPoint.sub(this.pos);
-
     let displaceRange = 0.3;
     this.wanderTheta += random(-displaceRange, displaceRange);
     this.acc.add(steer);
@@ -139,7 +122,7 @@ class Worm {
     pop();
   }
 
-  hasEnergy() {
+  hasHealth() {
     this.health--;
     return this.health > 0;
   }
@@ -153,13 +136,42 @@ class Worm {
     return dist < this.rad + other.rad;
   }
 
+  arm() {
+    push();
+    strokeWeight(2);
+    stroke("black");
+    translate(this.pos.x, this.pos.y);
+    rotate(this.vel.heading());
+    line(0, this.hei / 2, 0, this.hei / 2 + this.hei);
+    line(0, -this.hei / 2, 0, -this.hei / 2 + -this.hei);
+    pop();
+  }
+
+  vision(mood, locX, locY) {
+    push();
+    strokeWeight(3);
+    stroke(mood);
+    line(this.pos.x, this.pos.y, locX, locY);
+    pop();
+  }
+
   eye(mood, sight) {
     push();
     rectMode(CENTER);
-    fill(mood);
+    fill("white");
+    //sclera
+    noStroke();
     ellipse(this.pos.x, this.pos.y, this.rad / 2);
     strokeWeight(sight);
+    //iris
+    stroke(mood);
     point(this.pos.x, this.pos.y);
+    strokeWeight(3);
+    //pupil
+    push();
+    stroke("black");
+    point(this.pos.x, this.pos.y);
+    pop();
     pop();
   }
 

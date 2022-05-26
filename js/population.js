@@ -1,26 +1,19 @@
-// pos, wid, e_hei, rad, vel
 class Population {
-  constructor(sp, t, wr, hr, vel, rad) {
+  constructor(sp, t, wr, hr, rad) {
     this.species = sp;
     this.total = t;
     this.w_range = wr;
     this.h_range = hr;
-    this.v_range = vel;
     this.rad = rad;
     this.deceased = [];
     this.arr = [];
   }
-  //it's because there's no Position being passed in from scene to Population
   show() {
     for (let i = 0; i < this.total; i++) {
       this.arr[i] = new this.species(
         createVector(random(width), random(height)),
         random(this.w_range - 85, this.w_range),
         random(this.h_range / 2, this.h_range),
-        createVector(
-          random(-this.v_range, this.v_range),
-          random(-this.v_range, this.v_range)
-        ),
         random(this.rad / 2, this.rad)
       );
     }

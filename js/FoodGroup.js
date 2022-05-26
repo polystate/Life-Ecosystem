@@ -30,7 +30,7 @@ class FoodGroup {
   applyAttribute(specie) {
     switch (this.name) {
       case "Berry":
-        specie.health += 1000;
+        specie.health += 500;
         break;
       case "Lime":
         specie.maxSpeed = 2;
