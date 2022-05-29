@@ -1,6 +1,6 @@
 class Population {
   constructor(sp, t, wr, hr, rad) {
-    this.species = sp;
+    this._species = sp;
     this.total = t;
     this.w_range = wr;
     this.h_range = hr;
@@ -10,15 +10,19 @@ class Population {
   }
   show() {
     for (let i = 0; i < this.total; i++) {
-      this.arr[i] = new this.species(
+      this.arr[i] = new this._species(
         createVector(random(width), random(height)),
         random(this.w_range - 85, this.w_range),
         random(this.h_range / 2, this.h_range),
         random(this.rad / 2, this.rad)
+        // random(2, 4) maxSpeed
       );
     }
   }
-  update() {
+  update(foodGroupArr) {
+    let foodLocArr = foodGroupArr.map((foodArr) =>
+      foodArr.arr.map((food) => food.pos)
+    );
     for (let specie of this.arr) {
       if (!specie.isAlive()) {
         this.deceased.push(specie);
@@ -27,15 +31,16 @@ class Population {
         break;
       }
       specie.show();
-      specie.update();
-      this.overLapOther(specie);
+      specie.update(foodLocArr, this.arr);
     }
   }
+
   overLapOther(other) {
     let overlap = false;
     for (let specie of this.arr) {
       if (other !== specie && other.intersects(specie)) {
         overlap = true;
+        // specie.resist(other, this.total);
       }
     }
     if (overlap) {

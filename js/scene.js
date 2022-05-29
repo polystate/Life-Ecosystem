@@ -5,7 +5,7 @@ let environment;
 // pos, wid, e_hei, rad, vel
 let wormSpecies = {
   class: Worm,
-  amount: 4,
+  amount: 32,
   w_range: 200,
   h_range: 60,
   rad: 72,
@@ -14,6 +14,8 @@ let wormSpecies = {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   rectMode(RADIUS);
+
+  /*p5.js*/
   population = new Population(
     wormSpecies.class,
     wormSpecies.amount,

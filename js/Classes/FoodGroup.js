@@ -18,6 +18,9 @@ class FoodGroup {
       this.arr[i].update();
     }
   }
+  attractSpecie(specie) {
+    this.arr.forEach((food) => food.attract(specie));
+  }
   specieIntersect(specie) {
     for (let food of this.arr) {
       if (specie.intersects(food)) {
@@ -33,10 +36,13 @@ class FoodGroup {
         specie.health += 500;
         break;
       case "Lime":
-        specie.maxSpeed = 2;
+        specie.maxSpeed * 2;
+        specie.maxForce * 2;
+        specie.health += 250;
         setTimeout(() => {
-          specie.maxSpeed = 1.5;
-        }, 3000);
+          specie.maxSpeed / 2;
+          specie.maxForce / 2;
+        }, 5000);
     }
   }
 }
