@@ -5,11 +5,20 @@ let environment;
 // pos, wid, e_hei, rad, vel
 let wormSpecies = {
   class: Worm,
-  amount: 32,
+  amount: 16,
   w_range: 200,
   h_range: 60,
   rad: 72,
 };
+
+//115 to 200 for width, 30 to 60 for height
+
+//maxSpeed 1/4
+//3,450 to 12,000
+//multiply two numbers to find k or constant for inverse correlation y = 1/x
+
+//1 * 3,450 = 4 * 12,000
+//3,450 - 48,000
 
 function setup() {
   createCanvas(windowWidth, windowHeight);

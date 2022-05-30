@@ -26,22 +26,23 @@ class FoodGroup {
       if (specie.intersects(food)) {
         this.applyAttribute(specie);
         food.rad = food.rad / 2;
-        break;
+        // if (food.rad < 5) {
+        //   this.arr.splice(this.arr.indexOf(food, 1);
+        // }
       }
     }
   }
   applyAttribute(specie) {
     switch (this.name) {
       case "Berry":
-        specie.health += 500;
+        specie.energy += 125;
         break;
       case "Lime":
         specie.maxSpeed * 2;
-        specie.maxForce * 2;
-        specie.health += 250;
+
+        specie.energy += 75;
         setTimeout(() => {
           specie.maxSpeed / 2;
-          specie.maxForce / 2;
         }, 5000);
     }
   }

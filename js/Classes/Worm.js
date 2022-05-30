@@ -1,5 +1,5 @@
 class Worm {
-  constructor(pos, wid, hei, rad, max = 2, col = 0, alpha = 30) {
+  constructor(pos, wid, hei, rad, maxMass, col = 0, alpha = 30) {
     //variant or inherited traits
     this.pos = pos;
     this.wid = wid;
@@ -9,13 +9,13 @@ class Worm {
     this.vel = createVector(0, 0);
     this.acc = createVector(0, 0);
     //computed traits based on inherited
-    this.mass = this.wid * this.hei;
+    this.mass = ceil(this.wid * this.hei);
     this.sight = sqrt((this.wid * this.hei) / this.rad);
-    this.energy = this.wid * this.hei;
-    this.lifeforce = this.energy / 2;
+    this.energy = ceil(this.wid * this.hei);
+    this.lifeforce = ceil(this.energy / 2);
     this.col = col;
     this.alp = alpha;
-    this.maxSpeed = max;
+    this.maxSpeed = maxMass / this.mass; //divide max population/specie mass by entity's given mass, the smaller the worm, the faster it is by some constant, however be aware eyeball size has not been accounted for in mass, so creatures could evolve to having big eyes with no penalty
     this.maxForce = 0.1; //tied to health and ability to steer maybe
   }
 
@@ -42,7 +42,6 @@ class Worm {
     this.eye("lightblue", this.sight);
     this.applyBehaviors(foodLocArr, otherArr);
     if (this.hasEnergy()) {
-      // this.applyForce(p5.Vector.random2D());
       this.vel.add(this.acc);
       this.vel.limit(this.maxSpeed);
       this.pos.add(this.vel);
@@ -82,7 +81,6 @@ class Worm {
     for (let other of otherArr) {
       dist = this.pos.dist(other.pos);
       if (dist > 0 && dist < desiredSeparation) {
-        // console.log("colliding");
         diff = p5.Vector.sub(this.pos, other.pos);
         diff.normalize();
         sum.add(diff);
@@ -96,7 +94,6 @@ class Worm {
     sum.setMag(this.maxSpeed);
     let steer = p5.Vector.sub(sum, this.vel);
     steer.limit(this.maxForce);
-    // this.applyForce(steer);
     return steer;
   }
 
@@ -106,7 +103,6 @@ class Worm {
     desired.mult(this.maxSpeed);
     let steer = p5.Vector.sub(desired, this.vel);
     steer.limit(this.maxForce);
-    // this.applyForce(steer);
     return steer;
   }
 
@@ -209,9 +205,9 @@ class Worm {
     strokeWeight(3);
     //pupil
     push();
-    stroke("gold");
+    stroke("black");
     point(this.pos.x, this.pos.y);
-    line(this.pos.x, this.pos.y, nearestTarget.x, nearestTarget.y);
+    // line(this.pos.x, this.pos.y, nearestTarget.x, nearestTarget.y);
     pop();
     pop();
   }

@@ -17,10 +17,10 @@ class Food {
   }
   update() {
     if (this.rad <= 5) {
-      // setTimeout(this.respawn.bind(this), 5000);
       this.respawn();
     }
   }
+
   attract(other) {
     let force = p5.Vector.sub(this.pos, other.pos);
     let distance = force.mag();

@@ -14,8 +14,8 @@ class Population {
         createVector(random(width), random(height)),
         random(this.w_range - 85, this.w_range),
         random(this.h_range / 2, this.h_range),
-        random(this.rad / 2, this.rad)
-        // random(2, 4) maxSpeed
+        random(this.rad / 2, this.rad),
+        this.w_range * this.h_range //maxMass
       );
     }
   }
@@ -40,7 +40,6 @@ class Population {
     for (let specie of this.arr) {
       if (other !== specie && other.intersects(specie)) {
         overlap = true;
-        // specie.resist(other, this.total);
       }
     }
     if (overlap) {
