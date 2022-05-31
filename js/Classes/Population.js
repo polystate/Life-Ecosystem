@@ -19,19 +19,24 @@ class Population {
       );
     }
   }
-  update(foodGroupArr) {
+  update(foodGroupArr, pred) {
     let foodLocArr = foodGroupArr.map((foodArr) =>
       foodArr.arr.map((food) => food.pos)
     );
+
+    let predPositions = pred.arr.map((spider) => [spider.pos]);
+
+    // console.log(foodLocArr);
+    // console.log(predPositions);
+    // let predArr = pred.map((p) => p.pos);
     for (let specie of this.arr) {
       if (!specie.isAlive()) {
         this.deceased.push(specie);
         this.arr.splice(this.arr.indexOf(specie), 1);
         this.total -= 1;
-        break;
       }
       specie.show();
-      specie.update(foodLocArr, this.arr);
+      specie.update(foodLocArr, this.arr, predPositions);
     }
   }
 

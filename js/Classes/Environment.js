@@ -31,25 +31,33 @@ class Environment {
   }
 
   show() {
-    this.pop.show();
-    for (const foodGroup of this.foodGroupArr) {
-      if (foodGroup.active) {
-        foodGroup.show(this.pop, this.foodGroupArr.length);
+    for (const p of this.pop) {
+      p.show();
+    }
+    // this.pop.show();
+    for (let i = 0; i < this.pop.length; i++) {
+      for (const foodGroup of this.foodGroupArr) {
+        foodGroup.show(this.pop[i], this.foodGroupArr.length);
       }
     }
   }
   update() {
     this.drawMap();
-    this.pop.update(this.foodGroupArr);
+    for (const p of this.pop) {
+      for (let other of this.pop) {
+        if (p !== other) {
+          p.update(this.foodGroupArr, other);
+        }
+      }
+    }
     for (const foodGroup of this.foodGroupArr) {
-      if (foodGroup.active) {
-        foodGroup.update(this.pop, this.foodGroupArr.length);
+      for (const p of this.pop) {
+        foodGroup.update(p, this.foodGroupArr.length);
       }
     }
 
     this.overLapFood();
     this.wall();
-    this.overLapTerrain();
   }
 
   drawMap() {
@@ -71,24 +79,28 @@ class Environment {
     pop();
   }
 
-  overLapTerrain() {
-    for (const specie of this.pop.arr) {
-      // specie.applyForce(this.friction(specie, 0.04));
-    }
-  }
+  // overLapTerrain() {
+  //   for (const p of this.pop.arr) {
+  //     for (const specie of this.pop.arr) {
+  //       // specie.applyForce(this.friction(specie, 0.04));
+  //     }
+  //   }
+  // }
 
   overLapFood() {
-    for (const specie of this.pop.arr) {
-      for (const foodGroup of this.foodGroupArr) {
-        // foodGroup.attractSpecie(specie);
+    for (const p of this.pop) {
+      for (const specie of p.arr) {
+        for (const foodGroup of this.foodGroupArr) {
+          // foodGroup.attractSpecie(specie);
 
-        foodGroup.specieIntersect(specie);
+          foodGroup.specieIntersect(specie);
+        }
       }
     }
   }
-  decompose() {
-    console.log(this.pop.deceased);
-  }
+  // decompose() {
+  //   console.log(this.pop.deceased);
+  // }
 
   friction(specie, amount) {
     let coefficient = amount;
@@ -101,14 +113,16 @@ class Environment {
   }
 
   wall() {
-    for (const specie of this.pop.arr) {
-      if (
-        specie.pos.x >= width - specie.wid / 2 ||
-        specie.pos.x <= specie.wid / 2 ||
-        specie.pos.y <= specie.wid / 2 ||
-        specie.pos.y >= height - specie.wid / 2
-      ) {
-        specie.applyForce(this.friction(specie, 0.01));
+    for (const p of this.pop) {
+      for (const specie of p.arr) {
+        if (
+          specie.pos.x >= width - specie.wid / 2 ||
+          specie.pos.x <= specie.wid / 2 ||
+          specie.pos.y <= specie.wid / 2 ||
+          specie.pos.y >= height - specie.wid / 2
+        ) {
+          specie.applyForce(this.friction(specie, 0.01));
+        }
       }
     }
   }
