@@ -11,22 +11,6 @@ class Environment {
         wid: 25,
         hei: 100,
       },
-
-      // sand: {
-      //   col: "#eecda3",
-      //   loc: createVector(500, 600),
-      //   effect: "specie can get ensnared and trapped in quicksand",
-      // },
-      // grass: {
-      //   col: "#4A5D23",
-      //   loc: createVector(100, 400),
-      //   effect: "specie's acceleration goes up a little bit",
-      // },
-      // water: {
-      //   col: "#064273",
-      //   loc: createVector(610, 670),
-      //   effect: "specie slides with friction",
-      // },
     };
   }
 
@@ -43,12 +27,15 @@ class Environment {
   }
   update() {
     this.drawMap();
+
     for (const p of this.pop) {
-      for (let other of this.pop) {
-        if (p !== other) {
-          p.update(this.foodGroupArr, other);
+      if (this.pop.length > 1) {
+        for (let other of this.pop) {
+          if (p !== other) {
+            p.update(this.foodGroupArr, other);
+          }
         }
-      }
+      } else p.update(this.foodGroupArr);
     }
     for (const foodGroup of this.foodGroupArr) {
       for (const p of this.pop) {

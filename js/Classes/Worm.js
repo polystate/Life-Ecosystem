@@ -1,5 +1,6 @@
 class Worm {
   constructor(pos, wid, hei, rad, maxMass, col = 0, alpha = 30) {
+    this.brain = new Perceptron(3, 0.001);
     //variant or inherited traits
     this.pos = pos;
     this.wid = wid;
@@ -14,7 +15,7 @@ class Worm {
     // this.sight = this.rad / this.mass;
     this.sight = map(this.rad, 36, 72, 6, 9);
     // this.energy = 1.5;
-    this.energy = 2;
+    this.energy = 5;
     this.lifeforce = this.energy * 5;
     this.col = col;
     this.alp = alpha;
@@ -76,7 +77,7 @@ class Worm {
     pop();
   }
 
-  update(foodLocArr, otherArr, predator) {
+  update(foodLocArr, otherArr, predator = null) {
     this.eye("lightblue", this.sight);
     this.applyBehaviors(foodLocArr, otherArr, predator);
     if (this.hasEnergy()) {
@@ -106,16 +107,19 @@ class Worm {
   applyBehaviors(foodLocArr, otherArr, predator) {
     let separate = this.separate(otherArr);
     let seek = this.seek(this.getNearestTarget(foodLocArr));
-    let flee = this.flee(this.getNearestTarget(predator));
+    if (predator) {
+      let flee = this.flee(this.getNearestTarget(predator));
+      flee.mult(2);
+      this.applyForce(flee);
+    }
     separate.mult(1);
 
     if (foodLocArr[0].length) {
       seek.mult(1.5);
     }
-    flee.mult(2);
+    // flee.mult(2);
     this.applyForce(separate);
     this.applyForce(seek);
-    this.applyForce(flee);
   }
 
   separate(otherArr) {
@@ -155,6 +159,19 @@ class Worm {
     steer.limit(this.maxForce);
     steer.mult(-1);
     return steer;
+  }
+
+  brainSteer(targets) {
+    let forces = createVector(targets.size());
+    for (let i = 0; i < forces.length; i++) {
+      forces[i] = seek(targets.get(i));
+    }
+    let result = createVector(this.brain.feedForward(forces));
+    applyForce(result);
+
+    let desired = createVector(width / 2, height / 2);
+    let error = createVector.sub(desired, this.pos);
+    this.brain.train(forces, error);
   }
 
   seek(targetVect) {

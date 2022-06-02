@@ -1,7 +1,7 @@
 class Spider extends Worm {
   constructor(pos, wid, hei, rad, maxMass, sight, energy) {
     super(pos, wid, hei, rad, maxMass, sight, energy);
-    this.energy = 2;
+    this.energy = 5;
   }
 
   show() {
@@ -40,6 +40,10 @@ class Spider extends Worm {
     point(this.pos.x + distFromRad, this.pos.y - this.hei / 2);
     rotate(this.vel.heading());
     pop();
+  }
+
+  update(foodLocArr, otherArr) {
+    super.update(foodLocArr, otherArr);
   }
 
   applyBehaviors(foodLocArr, otherArr) {

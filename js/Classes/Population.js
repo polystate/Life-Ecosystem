@@ -24,8 +24,10 @@ class Population {
       foodArr.arr.map((food) => food.pos)
     );
 
-    let predPositions = pred.arr.map((spider) => [spider.pos]);
-
+    let predPositions;
+    if (pred) {
+      predPositions = pred.arr.map((spider) => [spider.pos]);
+    }
     // console.log(foodLocArr);
     // console.log(predPositions);
     // let predArr = pred.map((p) => p.pos);
