@@ -6,14 +6,14 @@ let spider;
 // pos, wid, e_hei, rad, vel
 let wormSpecies = {
   class: Worm,
-  amount: 1,
+  amount: 32,
   w_range: 200,
   h_range: 60,
   rad: 72,
 };
 let spiderSpecies = {
   class: Spider,
-  amount: 1,
+  amount: 12,
   w_range: 300,
   h_range: 120,
   rad: 180,

@@ -2,7 +2,7 @@ class Spider_Population extends Population {
   constructor(sp, t, wr, hr, rad) {
     super(sp, t, wr, hr, rad);
   }
-  update(foodGroupArr) {
+  update(foodGroupArr, prey) {
     let foodLocArr = foodGroupArr.map((foodArr) =>
       foodArr.arr.map((food) => food.pos)
     );
@@ -13,7 +13,8 @@ class Spider_Population extends Population {
         this.total -= 1;
       }
       specie.show();
-      specie.update(foodLocArr, this.arr);
+
+      specie.update(foodLocArr, this.arr, prey);
     }
   }
 }

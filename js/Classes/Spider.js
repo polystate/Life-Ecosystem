@@ -42,20 +42,50 @@ class Spider extends Worm {
     pop();
   }
 
-  update(foodLocArr, otherArr) {
-    super.update(foodLocArr, otherArr);
+  update(foodLocArr, otherArr, prey) {
+    super.update(foodLocArr, otherArr, prey);
   }
 
-  applyBehaviors(foodLocArr, otherArr) {
+  applyBehaviors(foodLocArr, otherArr, prey = null) {
     let separate = this.separate(otherArr);
     let seek = this.seek(this.getNearestTarget(foodLocArr));
-    separate.mult(1);
+
+    if (prey.arr.length) {
+      let pursue = this.pursue(prey.arr[0]);
+      pursue.mult(1.6); // before 1.6
+
+      this.applyForce(pursue);
+    }
+    separate.mult(1.4);
 
     if (foodLocArr[0].length) {
       seek.mult(1.5);
     }
     this.applyForce(separate);
     this.applyForce(seek);
+  }
+
+  pursue(prey) {
+    let target = prey.pos.copy();
+    let prediction = prey.vel.copy();
+    prediction.mult(2);
+    target.add(prediction);
+
+    return this.seek(target);
+  }
+
+  seek(targetVect) {
+    if (!targetVect) {
+      return;
+    }
+
+    let desired = p5.Vector.sub(targetVect, this.pos);
+    desired.normalize();
+    desired.mult(this.maxSpeed);
+    let steer = p5.Vector.sub(desired, this.vel);
+    steer.limit(this.maxForce);
+
+    return steer;
   }
 
   arm(movement, originVect) {

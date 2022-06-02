@@ -112,10 +112,10 @@ class Worm {
       flee.mult(2);
       this.applyForce(flee);
     }
-    separate.mult(1);
+    separate.mult(0.75);
 
     if (foodLocArr[0].length) {
-      seek.mult(1.5);
+      seek.mult(5 / this.energy);
     }
     // flee.mult(2);
     this.applyForce(separate);
