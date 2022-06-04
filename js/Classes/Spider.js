@@ -51,12 +51,12 @@ class Spider extends Worm {
     let seek = this.seek(this.getNearestTarget(foodLocArr));
 
     if (prey.arr.length) {
-      let pursue = this.pursue(prey.arr[0]);
+      let pursue = this.pursue(prey.arr[0], 5 / this.energy);
       pursue.mult(1.6); // before 1.6
 
       this.applyForce(pursue);
     }
-    separate.mult(1.4);
+    separate.mult(1);
 
     if (foodLocArr[0].length) {
       seek.mult(1.5);
@@ -65,10 +65,10 @@ class Spider extends Worm {
     this.applyForce(seek);
   }
 
-  pursue(prey) {
+  pursue(prey, predict) {
     let target = prey.pos.copy();
     let prediction = prey.vel.copy();
-    prediction.mult(2);
+    prediction.mult(predict);
     target.add(prediction);
 
     return this.seek(target);

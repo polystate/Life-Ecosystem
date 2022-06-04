@@ -7,6 +7,10 @@ class Population {
     this.rad = rad;
     this.deceased = [];
     this.arr = [];
+    this.fitness = [];
+    this.matingPool = [];
+    this.mutationRate = 0.01;
+    this.worldRecord = 0;
   }
   show() {
     for (let i = 0; i < this.total; i++) {
@@ -18,6 +22,9 @@ class Population {
         this.w_range * this.h_range //maxMass
       );
     }
+    // for (let specie in this.arr) {
+    //   this.arr[specie].wormBrain();
+    // }
   }
   update(foodGroupArr, pred) {
     let foodLocArr = foodGroupArr.map((foodArr) =>
@@ -32,13 +39,67 @@ class Population {
     // console.log(predPositions);
     // let predArr = pred.map((p) => p.pos);
     for (let specie of this.arr) {
-      if (!specie.isAlive()) {
+      if (!specie.hasEnergy()) {
+        if (specie.lifespan > this.worldRecord) {
+          this.worldRecord = specie.lifespan;
+        }
+
+        this.fitness.push(
+          specie.DNA.fitness(specie.lifespan, this.worldRecord)
+        );
         this.deceased.push(specie);
         this.arr.splice(this.arr.indexOf(specie), 1);
         this.total -= 1;
       }
       specie.show();
       specie.update(foodLocArr, this.arr, predPositions);
+      this.checkPopulation();
+    }
+  }
+
+  checkPopulation() {
+    if (!this.arr.length) {
+      this.generateMatingPool();
+      this.reproduction();
+      console.log(this.worldRecord);
+    }
+  }
+
+  // calcFitness() {
+  //   for (let i = 0; i < this.deceased.length; i++) {
+  //     this.fitness.push(this.deceased[i].DNA.fitness());
+  //   }
+  // }
+
+  generateMatingPool() {
+    for (let i = 0; i < this.fitness.length; i++) {
+      let selectionRate = this.fitness[i] * 100; //add each member this amount of times to according to its fitness score
+      for (let j = 0; j < selectionRate; j++) {
+        this.matingPool.push(this.deceased[i]);
+      }
+    }
+  }
+
+  reproduction() {
+    for (let i = 0; i < this.matingPool.length; i++) {
+      let partnerA = random(this.matingPool);
+      let partnerB = random(this.matingPool);
+
+      let child = partnerA.DNA.crossover(partnerB.DNA);
+
+      // child.DNA.mutate(this.mutationRate);
+      // this.arr[i] = child;
+      let newChild = new this._species(
+        createVector(random(width), random(height)),
+        child.genes[0],
+        child.genes[1],
+        child.genes[2],
+        child.genes[3]
+        // child.genes[4]
+      );
+      if (this.arr.length < 4) {
+        this.arr.push(newChild);
+      }
     }
   }
 

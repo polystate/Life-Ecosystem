@@ -3,17 +3,19 @@ let berries;
 let lime;
 let environment;
 let spider;
+let brain;
+let newMatrix;
 // pos, wid, e_hei, rad, vel
 let wormSpecies = {
   class: Worm,
-  amount: 32,
+  amount: 4,
   w_range: 200,
   h_range: 60,
   rad: 72,
 };
 let spiderSpecies = {
   class: Spider,
-  amount: 12,
+  amount: 1,
   w_range: 300,
   h_range: 120,
   rad: 180,
@@ -55,7 +57,7 @@ function setup() {
 
   berries = new FoodGroup("Berry", Food, "purple", true);
   lime = new FoodGroup("Lime", Food, "green", true);
-  environment = new Environment([population, spider_pop], [berries, lime]);
+  environment = new Environment([population], [berries, lime]);
   environment.show();
 }
 
