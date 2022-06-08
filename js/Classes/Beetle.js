@@ -1,4 +1,4 @@
-class Spider extends Worm {
+class Beetle extends Insect {
   constructor(pos, wid, hei, rad, maxMass, sight, energy) {
     super(pos, wid, hei, rad, maxMass, sight, energy);
     this.energy = 5;

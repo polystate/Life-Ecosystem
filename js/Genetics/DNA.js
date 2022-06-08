@@ -1,26 +1,25 @@
 class DNA {
-  constructor(wid, hei, rad, mass, sight) {
-    this.genes = [wid, hei, rad, mass, sight];
-    this.movements = [];
+  constructor(wid, hei, rad, mass) {
+    this.genes = [wid, hei, rad, mass];
   }
-  fitness(lifespan, worldRecord) {
+  fitness(lifespan, worldRecord, bitesTaken, maxBitesTaken) {
     if (lifespan > worldRecord) {
       worldRecord = lifespan;
     }
-    lifespan = map(lifespan, 0, worldRecord, 0, 1);
+    if (bitesTaken > maxBitesTaken) {
+      maxBitesTaken = bitesTaken;
+    }
 
-    return lifespan;
+    lifespan = map(lifespan, 0, worldRecord, 0, 1);
+    bitesTaken = map(bitesTaken, 0, maxBitesTaken, 0, 1);
+    console.log(bitesTaken);
+
+    return lifespan + bitesTaken;
   }
   crossover(partner) {
-    let child = new DNA(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    let child = new DNA();
     let midpoint = random(this.genes.length);
+
     for (let i = 0; i < this.genes.length; i++) {
       if (i > midpoint) {
         child.genes[i] = this.genes[i];
@@ -31,7 +30,7 @@ class DNA {
   mutate(mutationRate) {
     for (let i = 0; i < this.genes.length; i++) {
       if (random(1) < mutationRate) {
-        this.genes[i] = random(32, 128);
+        this.genes[i] = random(25, 175);
       }
     }
   }

@@ -1,36 +1,32 @@
-class Worm {
-  constructor(pos, wid, hei, rad, maxMass, col = 0, alpha = 30) {
-    //variant or inherited traits
+class Insect {
+  constructor(pos, wid, hei, rad, maxMass, initial, col = 0, alpha = 30) {
+    this.brain = new NeuralNetwork(6, 12, 6);
+    this.initial = initial;
     this.pos = pos;
     this.wid = wid;
     this.hei = hei;
     this.rad = rad;
-    //default traits or blank slate
     this.vel = createVector(0, 0);
     this.acc = createVector(0, 0);
-    //computed traits based on inherited
-    this.mass = ceil(this.wid * this.hei);
-    // this.sight = sqrt((this.wid * this.hei) / this.rad);
-    // this.sight = this.rad / this.mass;
+    this.mass = ceil(this.wid * this.hei + this.rad);
     this.sight = map(this.rad, 36, 72, 6, 9);
-
-    // this.energy = 1.5;
-    this.energy = this.mass;
+    this.energy = 16;
     this.col = col;
     this.alp = alpha;
-    this.maxSpeed = maxMass / this.mass; //divide max population/specie mass by entity's given mass, the smaller the worm, the faster it is by some constant, however be aware eyeball size has not been accounted for in mass, so creatures could evolve to having big eyes with no penalty
-    this.maxForce = 0.1; //tied to health and ability to steer maybe
+    this.maxSpeed = maxMass / this.mass;
+    this.maxForce = 0.1;
     this.angle = 0;
     this.angV = 0;
-    // this.aAcc = random(-0.0001, 0.0001);
-    this.aAcc = 0;
+    this.aAcc = 0.001;
     this.steer = 0;
     this.DNA = new DNA(this.wid, this.hei, this.rad, this.mass, this.sight);
     this.lifespan = 0;
+    this.bitesTaken = 0;
   }
 
   show() {
     push();
+
     rectMode(CENTER);
     noStroke();
     fill(this.col, this.alp);
@@ -38,6 +34,7 @@ class Worm {
     this.pos.x = constrain(this.pos.x, this.wid / 2, width - this.wid / 2);
     this.pos.y = constrain(this.pos.y, this.wid / 2, height - this.wid / 2);
     translate(this.pos.x, this.pos.y);
+
     rotate(this.vel.heading());
     rect(0, 0, this.wid, this.hei, this.rad);
     strokeWeight(1);
@@ -47,39 +44,63 @@ class Worm {
     pop();
 
     this.arm(0.05, this.pos);
+  }
 
-    push();
-    let diag = sqrt(sq(this.wid) + sq(this.hei));
-    let distFromRad = diag / 2;
+  brainStartup(foodLocArr) {
+    let nearestFood = this.getNearestTarget(foodLocArr).copy();
 
-    translate(this.pos.x, this.pos.y);
-    stroke(20);
-    strokeWeight(3);
-    let dx = distFromRad * cos(this.vel.heading());
-    let dy = distFromRad * sin(this.vel.heading());
-    rotate(PI / 2);
+    nearestFood.normalize();
 
-    pop();
+    let positionX = map(this.pos.x, 0, width, 0, 1);
+    let positionY = map(this.pos.y, 0, height, 0, 1);
+
+    let energyMap = map(this.energy, 0, this.energy, 0, 1);
+    let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
+    let inputValues = [
+      positionX,
+      positionY,
+      nearestFood.x,
+      nearestFood.y,
+      energyMap,
+      maxSpeedMap,
+    ];
+
+    let brainMovement = this.brain.predict(inputValues);
+    return brainMovement;
   }
 
   update(foodLocArr, otherArr, predator = null) {
     this.eye("lightblue", this.sight);
-    // this.applyBehaviors(foodLocArr, otherArr, predator);
 
-    let randomVect = p5.Vector.random2D();
-    randomVect.mult(random(0, this.maxForce));
-    this.applyForce(randomVect);
-    this.DNA.movements.push(randomVect);
-
+    this.randomWalk(this.brainStartup(foodLocArr));
+    //after every generation, update the weights of the child based on crossover and parentA and parentB
     if (this.hasEnergy()) {
       this.lifespan++;
       this.vel.add(this.acc);
       this.vel.limit(this.maxSpeed);
       this.pos.add(this.vel);
-
       this.acc.mult(0);
     }
-    // else this.DNA.fitness(this.lifespan);
+  }
+
+  randomWalk(arr) {
+    // console.log(this.brainWeights);
+
+    let action = (x, y) => {
+      this.applyForce(createVector(x, y));
+    };
+    if (arr[0] >= 0.5) {
+      action(1, 0);
+    }
+    if (arr[1] >= 0.5) {
+      action(-1, 0);
+    }
+    if (arr[2] >= 0.5) {
+      action(0, 1);
+    }
+    if (arr[3] >= 0.5) {
+      action(0, -1);
+    }
   }
 
   applyBehaviors(foodLocArr, otherArr, predator) {
@@ -95,7 +116,7 @@ class Worm {
     if (foodLocArr[0].length) {
       seek.mult(5 / this.energy);
     }
-    // flee.mult(2);
+
     this.applyForce(separate);
     this.applyForce(seek);
   }
@@ -162,34 +183,19 @@ class Worm {
 
   applyForce(forceVect) {
     if (!forceVect) return;
-    // console.log(forceVect);
-    // forceVect = createVector(forceVect[0], forceVect[1]);
-
     let force = forceVect.copy();
-
     // force.div(this.mass);
     this.acc.add(force);
   }
 
   hasEnergy() {
-    this.energy -= 5;
+    this.energy -= 0.01;
     return this.energy > 0;
   }
 
   intersects(other) {
     let dist = this.pos.dist(other.pos);
     return dist < this.rad + other.rad;
-  }
-
-  reproduction(other) {
-    let force = p5.Vector.sub(this.pos, other.pos);
-    let distance = force.mag();
-    distance = constrain(distance, 1, 2);
-    force.normalize();
-    let strength = (sqrt(other.mass) * this.rad) / sq(distance);
-
-    force.mult(strength);
-    other.applyForce(force);
   }
 
   arm(movement, originVect) {

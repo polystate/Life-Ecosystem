@@ -59,13 +59,13 @@ class NeuralNetwork {
     // Generating the Hidden Outputs
     let inputs = Matrix.fromArray(input_array);
     let hidden = Matrix.multiply(this.weights_ih, inputs);
-    hidden.add(this.bias_h);
+    // hidden.add(this.bias_h);
     // activation function!
     hidden.map(this.activation_function.func);
 
     // Generating the output's output!
     let output = Matrix.multiply(this.weights_ho, hidden);
-    output.add(this.bias_o);
+    // output.add(this.bias_o);
     output.map(this.activation_function.func);
 
     // Sending back to the caller!
@@ -135,7 +135,7 @@ class NeuralNetwork {
     outputs.print();
     targets.print();
     output_errors.print();
-    return this.predict(input_array);
+    return [this.bias_h, this.bias_o];
   }
 
   serialize() {
@@ -164,11 +164,92 @@ class NeuralNetwork {
     return new NeuralNetwork(this);
   }
 
+  merge(partner) {}
+
   // Accept an arbitrary function for mutation
   mutate(func) {
     this.weights_ih.map(func);
     this.weights_ho.map(func);
     this.bias_h.map(func);
     this.bias_o.map(func);
+  }
+}
+
+class NeuralNetwork2 {
+  constructor(neuronCounts) {
+    //[num of inputs of first layer, num of outputs/bias/connection to second layer, and so forth, can have as many layers as you want like [3,4,5,6,7,8,etc.], 3 inputs for first layer 4 outputs for next, and then you move up a level and then it goes to 4inputs for second layer, 5 ouputs for third, etc.] first layer is number of sensors, inputs, the final layer should have four output neurons one for forward one for backward left right, etc. so make last number 4 no matter how many layers you have in between. everything is between -1 and 1 in terms of biases and weights
+    this.levels = [];
+    for (let i = 0; i < neuronCounts.length - 1; i++) {
+      this.levels.push(new Level(neuronCounts[i], neuronCounts[i + 1]));
+    }
+  }
+
+  static feedForward(givenInputs, network) {
+    let outputs = Level.feedForward(givenInputs, network.levels[0]);
+    for (let i = 1; i < network.levels.length; i++) {
+      outputs = Level.feedForward(outputs, network.levels[i]);
+    }
+    return outputs;
+  }
+  static mutate(network, amount = 1) {
+    network.levels.forEach((level) => {
+      for (let i = 0; i < level.biases.length; i++) {
+        level.biases[i] = lerp(level.biases[i], Math.random() * 2 - 1, amount);
+      }
+      for (let i = 0; i < level.weights.length; i++) {
+        for (let j = 0; j < level.weights[i].length; j++) {
+          level.weights[i][j] = lerp(
+            level.weights[i][j],
+            Math.random() * 2 - 1,
+            amount
+          );
+        }
+      }
+    });
+  }
+}
+
+class Level {
+  constructor(inputCount, outputCount) {
+    this.inputs = new Array(inputCount);
+    this.outputs = new Array(outputCount);
+    this.biases = new Array(outputCount);
+
+    this.weights = [];
+    for (let i = 0; i < inputCount; i++) {
+      this.weights[i] = new Array(outputCount);
+    }
+
+    Level.#randomize(this);
+  }
+
+  static #randomize(level) {
+    for (let i = 0; i < level.inputs.length; i++) {
+      for (let j = 0; j < level.outputs.length; j++) {
+        level.weights[i][j] = Math.random() * 2 - 1;
+      }
+    }
+    for (let i = 0; i < level.biases.length; i++) {
+      level.biases[i] = Math.random() * 2 - 1;
+    }
+  }
+
+  static feedForward(givenInputs, level) {
+    for (let i = 0; i < level.inputs.length; i++) {
+      level.inputs[i] = givenInputs[i];
+    }
+    for (let i = 0; i < level.outputs.length; i++) {
+      let sum = 0;
+      for (let j = 0; j < level.inputs.length; j++) {
+        sum += level.inputs[j] * level.weights[j][i];
+      }
+
+      if (sum > level.biases[i]) {
+        level.outputs[i] = 1;
+      } else {
+        level.outputs[i] = 0;
+      }
+    }
+    return level.outputs;
   }
 }

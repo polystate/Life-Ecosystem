@@ -1,4 +1,4 @@
-class Spider_Population extends Population {
+class Beetle_Population extends Population {
   constructor(sp, t, wr, hr, rad) {
     super(sp, t, wr, hr, rad);
   }
@@ -7,7 +7,7 @@ class Spider_Population extends Population {
       foodArr.arr.map((food) => food.pos)
     );
     for (let specie of this.arr) {
-      if (!specie.isAlive()) {
+      if (!specie.hasEnergy()) {
         this.deceased.push(specie);
         this.arr.splice(this.arr.indexOf(specie), 1);
         this.total -= 1;

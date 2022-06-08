@@ -3,22 +3,12 @@ class Environment {
     this.pop = population;
     this.foodGroupArr = allFood;
     this.map = [];
-    this.terrain = {
-      mud: { col: 50, pos: null, wid: null, hei: null },
-      stone: {
-        col: "#676767",
-        pos: createVector(200, 200),
-        wid: 25,
-        hei: 100,
-      },
-    };
   }
 
   show() {
     for (const p of this.pop) {
       p.show();
     }
-    // this.pop.show();
     for (let i = 0; i < this.pop.length; i++) {
       for (const foodGroup of this.foodGroupArr) {
         foodGroup.show(this.pop[i], this.foodGroupArr.length);
@@ -26,8 +16,7 @@ class Environment {
     }
   }
   update() {
-    this.drawMap();
-
+    background(50);
     for (const p of this.pop) {
       if (this.pop.length > 1) {
         for (let other of this.pop) {
@@ -47,47 +36,15 @@ class Environment {
     this.wall();
   }
 
-  drawMap() {
-    background(this.terrain.mud.col);
-    // this.drawTerrain(
-    //   this.terrain.stone.col,
-    //   this.terrain.stone.pos.x,
-    //   this.terrain.stone.pos.y,
-    //   this.terrain.stone.wid,
-    //   this.terrain.stone.hei
-    // );
-  }
-
-  drawTerrain(texture, x, y, w, h) {
-    push();
-    noStroke();
-    fill(texture);
-    rect(x, y, w, h);
-    pop();
-  }
-
-  // overLapTerrain() {
-  //   for (const p of this.pop.arr) {
-  //     for (const specie of this.pop.arr) {
-  //       // specie.applyForce(this.friction(specie, 0.04));
-  //     }
-  //   }
-  // }
-
   overLapFood() {
     for (const p of this.pop) {
       for (const specie of p.arr) {
         for (const foodGroup of this.foodGroupArr) {
-          // foodGroup.attractSpecie(specie);
-
           foodGroup.specieIntersect(specie);
         }
       }
     }
   }
-  // decompose() {
-  //   console.log(this.pop.deceased);
-  // }
 
   friction(specie, amount) {
     let coefficient = amount;
