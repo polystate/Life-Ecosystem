@@ -1,16 +1,17 @@
 class Insect {
-  constructor(pos, wid, hei, rad, maxMass, initial, col = 0, alpha = 30) {
-    this.brain = new NeuralNetwork(6, 12, 6);
-    this.initial = initial;
+  constructor(pos, wid, hei, rad, maxMass, col = 0, alpha = 30) {
     this.pos = pos;
     this.wid = wid;
     this.hei = hei;
     this.rad = rad;
+    this.maxMass = maxMass;
     this.vel = createVector(0, 0);
     this.acc = createVector(0, 0);
     this.mass = ceil(this.wid * this.hei + this.rad);
     this.sight = map(this.rad, 36, 72, 6, 9);
+    this.brain = new Brain(5, 4, [3]);
     this.energy = 16;
+    this.health = this.energy / 2;
     this.col = col;
     this.alp = alpha;
     this.maxSpeed = maxMass / this.mass;
@@ -19,7 +20,7 @@ class Insect {
     this.angV = 0;
     this.aAcc = 0.001;
     this.steer = 0;
-    this.DNA = new DNA(this.wid, this.hei, this.rad, this.mass, this.sight);
+    this.DNA = new DNA(this.wid, this.hei, this.rad, this.mass);
     this.lifespan = 0;
     this.bitesTaken = 0;
   }
@@ -30,52 +31,71 @@ class Insect {
     rectMode(CENTER);
     noStroke();
     fill(this.col, this.alp);
-
     this.pos.x = constrain(this.pos.x, this.wid / 2, width - this.wid / 2);
     this.pos.y = constrain(this.pos.y, this.wid / 2, height - this.wid / 2);
     translate(this.pos.x, this.pos.y);
-
     rotate(this.vel.heading());
     rect(0, 0, this.wid, this.hei, this.rad);
     strokeWeight(1);
     stroke("white");
     this.vision();
-
     pop();
-
     this.arm(0.05, this.pos);
   }
 
   brainStartup(foodLocArr) {
-    let nearestFood = this.getNearestTarget(foodLocArr).copy();
+    // let nearestFood = this.getNearestTarget(foodLocArr).copy();
 
-    nearestFood.normalize();
+    // nearestFood.normalize();
 
-    let positionX = map(this.pos.x, 0, width, 0, 1);
-    let positionY = map(this.pos.y, 0, height, 0, 1);
+    let positionX = map(this.pos.x, 0, width, -1, 1);
+    let positionY = map(this.pos.y, 0, height, -1, 1);
+    let foodX;
+    let foodY;
 
-    let energyMap = map(this.energy, 0, this.energy, 0, 1);
-    let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
-    let inputValues = [
+    if (foodLocArr.length == 0) {
+      foodX = createVector(0, 0);
+      foodY = createVector(0, 0);
+    } else {
+      foodX = map(foodLocArr[0][0][0].x, 0, width, -1, 1);
+      foodY = map(foodLocArr[0][0][0].y, 0, height, -1, 1);
+    }
+    let energyMap = map(this.energy, 0, this.energy, -1, 1);
+    // let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
+
+    // let healthMap = map(this.health, 0, this.health, 0, 1);
+    // let massMap = map(this.mass, 0, 12000, -1, 1);
+    // let heightMap = map(this.hei, 0, 60, 0, 1);
+    // let widthMap = map(this.wid, 0, 200, 0, 1);
+    // let radMap = map(this.rad, 0, 72, 0, 1);
+
+    let outputs = this.brain.feedForward([
       positionX,
       positionY,
-      nearestFood.x,
-      nearestFood.y,
+      foodX,
+      foodY,
       energyMap,
-      maxSpeedMap,
-    ];
+    ]);
 
-    let brainMovement = this.brain.predict(inputValues);
-    return brainMovement;
+    return outputs;
   }
 
-  update(foodLocArr, otherArr, predator = null) {
+  update(foodLocArr, otherArr = null, predator = null) {
     this.eye("lightblue", this.sight);
+    // let outputs = this.brain.feedForward([this.pos.x, this.pos.y]);
+    // this.movement(outputs);
 
-    this.randomWalk(this.brainStartup(foodLocArr));
-    //after every generation, update the weights of the child based on crossover and parentA and parentB
+    this.movement(this.brainStartup(foodLocArr));
+
     if (this.hasEnergy()) {
       this.lifespan++;
+      this.vel.add(this.acc);
+      this.vel.limit(this.maxSpeed);
+      this.pos.add(this.vel);
+      this.acc.mult(0);
+    } else if (this.hasHealth()) {
+      this.lifespan++;
+      this.health -= 0.01;
       this.vel.add(this.acc);
       this.vel.limit(this.maxSpeed);
       this.pos.add(this.vel);
@@ -83,23 +103,18 @@ class Insect {
     }
   }
 
-  randomWalk(arr) {
-    // console.log(this.brainWeights);
-
-    let action = (x, y) => {
-      this.applyForce(createVector(x, y));
-    };
-    if (arr[0] >= 0.5) {
-      action(1, 0);
+  movement(outputs) {
+    if (outputs[0]) {
+      this.applyForce(createVector(0, -1));
     }
-    if (arr[1] >= 0.5) {
-      action(-1, 0);
+    if (outputs[1]) {
+      this.applyForce(createVector(0, 1));
     }
-    if (arr[2] >= 0.5) {
-      action(0, 1);
+    if (outputs[2]) {
+      this.applyForce(createVector(-1, 0));
     }
-    if (arr[3] >= 0.5) {
-      action(0, -1);
+    if (outputs[3]) {
+      this.applyForce(createVector(1, 0));
     }
   }
 
@@ -175,9 +190,11 @@ class Insect {
 
   getNearestTarget(vectorArr) {
     vectorArr = vectorArr.flat();
+
     let nearest = vectorArr.map((vect) => this.pos.dist(vect));
+
     nearest = nearest.indexOf(Math.min(...nearest));
-    //if nearest matches field of vision, proceed, otherwise return null
+
     return vectorArr[nearest];
   }
 
@@ -186,6 +203,10 @@ class Insect {
     let force = forceVect.copy();
     // force.div(this.mass);
     this.acc.add(force);
+  }
+
+  hasHealth() {
+    return this.health > 0;
   }
 
   hasEnergy() {
@@ -222,29 +243,17 @@ class Insect {
     line(floatX, armAmp.y, floatY, armAmp.y + this.hei);
     line(floatX, armAmp.x, floatY, armAmp.x + -this.hei);
     //fly
-    triangle(200, 200, 80);
+    // triangle(200, 200, 80);
     pop();
   }
 
   vision(other) {
-    //get a list of all objects in field of vision, goal.
-
-    // circle is immediate vision, line is targeted vision, line must intersect with food in order to experience gravitational pull, if circle intersects with food then automatically goes for the food
-    // console.log(other);
     let vacinity = pow(this.sight, 3);
-
-    // ellipse(0, 0, vacinity);
-
-    // let eyeCircle = this.pos.copy();
     let newValue = other - vacinity;
-    // console.log(newValue);
     if (newValue < vacinity) {
       return true;
     }
     return false;
-    /******** */
-    //to check if circle intersects with food,  we simply get our dist between specie center point and food, we then subtract that by vacinity and get a new value. if that new value is less than vacinity, then circle intersects with food
-    /******** */
   }
 
   eye(mood, sight, nearestTarget = 0) {

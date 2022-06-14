@@ -23,7 +23,7 @@ function setup() {
     insect.rad
   );
 
-  berries = new FoodGroup("Berry", Food, "purple", true);
+  berries = new FoodGroup("Berry", Food, "purple");
   lime = new FoodGroup("Lime", Food, "green");
   environment = new Environment([population], [berries, lime]);
   environment.show();

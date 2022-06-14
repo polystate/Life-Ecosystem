@@ -35,15 +35,10 @@ class FoodGroup {
   applyAttribute(specie) {
     switch (this.name) {
       case "Berry":
-        specie.energy += 1;
+        specie.health += 2;
         break;
       case "Lime":
-        // specie.maxSpeed * 2;
-
-        specie.energy += 1;
-      // setTimeout(() => {
-      //   specie.maxSpeed / 2;
-      // }, 5000);
+        specie.energy += 2;
     }
   }
 }

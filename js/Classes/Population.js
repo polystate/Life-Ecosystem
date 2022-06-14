@@ -1,5 +1,6 @@
 class Population {
   constructor(sp, t, wr, hr, rad) {
+    this.hivemind;
     this._species = sp;
     this.total = t;
     this.w_range = wr;
@@ -12,6 +13,13 @@ class Population {
     this.mutationRate = 0.01;
     this.worldRecord = 0;
     this.maxBitesTaken = 0;
+    this.bestSpecie;
+  }
+  get specieBrains() {
+    let hivemind;
+    let specieBrains = this.arr.map((specie) => specie.brain);
+    hivemind = new Hivemind(specieBrains);
+    return hivemind;
   }
   show() {
     for (let i = 0; i < this.total; i++) {
@@ -20,26 +28,25 @@ class Population {
         random(this.w_range - 85, this.w_range),
         random(this.h_range / 2, this.h_range),
         random(this.rad / 2, this.rad),
-        this.w_range * this.h_range,
-        createVector(random(-1, 1), random(-1, 1))
+        this.w_range * this.h_range
       );
     }
   }
-  update(foodGroupArr, pred) {
+  update(foodGroupArr) {
+    this.hivemind = this.specieBrains;
+    this.hivemind.checkNetworks();
     let foodLocArr = foodGroupArr.map((foodArr) =>
-      foodArr.arr.map((food) => food.pos)
+      foodArr.arr.map((food) => [food.pos, food.rad])
     );
-    let predPositions;
-    if (pred) {
-      predPositions = pred.arr.map((spider) => [spider.pos]);
-    }
+
     for (let specie of this.arr) {
-      if (!specie.hasEnergy()) {
+      if (!specie.hasHealth()) {
         if (specie.lifespan > this.worldRecord) {
           this.worldRecord = specie.lifespan;
         }
         if (specie.bitesTaken > this.maxBitesTaken) {
           this.maxBitesTaken = specie.bitesTaken;
+          this.bestSpecie = specie;
         }
 
         this.fitness.push(
@@ -56,7 +63,9 @@ class Population {
         this.arr.splice(this.arr.indexOf(specie), 1);
       }
       specie.show();
-      specie.update(foodLocArr, this.arr, predPositions);
+      let otherArrCopy = [...this.arr];
+      specie.update(foodLocArr, otherArrCopy, foodGroupArr);
+
       this.checkPopulation();
     }
   }
@@ -75,7 +84,8 @@ class Population {
       this.generateMatingPool();
       this.reproduction();
       console.log(this.maxBitesTaken);
-
+      this.hivemind = this.specieBrains;
+      this.hivemind.checkNetworks();
       this.matingPool = [];
       this.fitness = [];
       this.deceased = [];
@@ -102,59 +112,10 @@ class Population {
         child.genes[0],
         child.genes[1],
         child.genes[2],
-        child.genes[3],
-        createVector(random(-1, 1), random(-1, 1))
+        child.genes[3]
       );
-      // newChild.brain = parentA.brain.copy();
-      // console.log(newChild.brain);
-      //just overwrite the weights after new child is created
-      let partnerAIWeights = partnerA.brain.weights_ih.data;
-      let partnerBIWeights = partnerB.brain.weights_ih.data;
-      let partnerAOWeights = partnerA.brain.weights_ho.data;
-      let partnerBOWeights = partnerB.brain.weights_ho.data;
-      //
-      let parentIHWeights = partnerAIWeights.concat(partnerBIWeights);
-
-      let parentHOWeights = partnerAOWeights.concat(partnerBOWeights);
-      let offSpringIHWeights = [];
-      let offSpringHOWeights = [];
-      for (let i = partnerAIWeights.length; i > 0; i--) {
-        offSpringIHWeights.push(random(parentIHWeights));
-        parentIHWeights.splice(
-          parentIHWeights.indexOf(
-            offSpringIHWeights[offSpringIHWeights.length - 1]
-          ),
-          1
-        );
-      }
-
-      for (let i = partnerAIWeights.length; i > 0; i--) {
-        offSpringHOWeights.push(random(parentHOWeights));
-        parentHOWeights.splice(
-          parentHOWeights.indexOf(
-            offSpringHOWeights[offSpringHOWeights.length - 1]
-          ),
-          1
-        );
-      }
-      newChild.brain.weights_ih.data = offSpringIHWeights;
-      newChild.brain.weights_ho.data = offSpringHOWeights;
-      newChild.brain.bias_h = random([
-        partnerA.brain.bias_h,
-        partnerB.brain.bias_h,
-      ]);
-      newChild.brain.bias_o = random([
-        partnerA.brain.bias_o,
-        partnerB.brain_bias_o,
-      ]);
-      // newChild.inputValues = [
-      //   partnerA.brainMovement[0],
-      //   partnerA.brainMovement[1],
-      //   partnerB.brainMovement[0],
-      //   partnerB.brainMovement[1],
-      // ];
-
-      // noLoop();
+      // newChild.brain = this.bestSpecie.brain;
+      //child's brain not initialized yet
       if (this.arr.length < this.total) {
         this.arr.push(newChild);
       }
