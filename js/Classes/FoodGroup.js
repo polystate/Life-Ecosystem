@@ -7,7 +7,7 @@ class FoodGroup {
   }
   show(pop, numFoodGroups) {
     for (let i = 0; i < pop.arr.length / numFoodGroups; i++) {
-      this.arr[i] = new this._Food(random(15, 35), 100, this.col);
+      this.arr[i] = new this._Food(random(15, 35), 100, this.col, this.name);
     }
   }
   update(pop) {
@@ -17,7 +17,7 @@ class FoodGroup {
     }
 
     if (random(1) < 0.03 && this.arr.length < pop.arr.length) {
-      this.arr.push(new this._Food(random(15, 35), 100, this.col));
+      this.arr.push(new this._Food(random(15, 35), 100, this.col, this.name));
     }
   }
   specieIntersect(specie) {
@@ -35,8 +35,7 @@ class FoodGroup {
   applyAttribute(specie) {
     switch (this.name) {
       case "Berry":
-        specie.health += 2;
-        break;
+        specie.energy += 2;
       case "Lime":
         specie.energy += 2;
     }

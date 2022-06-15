@@ -35,8 +35,9 @@ class Population {
   update(foodGroupArr) {
     this.hivemind = this.specieBrains;
     this.hivemind.checkNetworks();
+
     let foodLocArr = foodGroupArr.map((foodArr) =>
-      foodArr.arr.map((food) => [food.pos, food.rad])
+      foodArr.arr.map((food) => ({ position: food.pos, f_name: food.name }))
     );
 
     for (let specie of this.arr) {
@@ -83,7 +84,7 @@ class Population {
     if (!this.arr.length) {
       this.generateMatingPool();
       this.reproduction();
-      console.log(this.maxBitesTaken);
+      console.log(this.worldRecord);
       this.hivemind = this.specieBrains;
       this.hivemind.checkNetworks();
       this.matingPool = [];
@@ -114,7 +115,7 @@ class Population {
         child.genes[2],
         child.genes[3]
       );
-      // newChild.brain = this.bestSpecie.brain;
+
       //child's brain not initialized yet
       if (this.arr.length < this.total) {
         this.arr.push(newChild);

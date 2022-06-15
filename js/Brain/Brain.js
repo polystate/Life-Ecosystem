@@ -48,103 +48,79 @@ class Brain {
       "hidden"
     );
   }
-  //Instance Methods
-  formConnection(neuronID, otherID, data) {
-    const allNeurons = this.inputNeurons
+
+  get numLayers() {
+    return this.outputNeurons[0].layer;
+  }
+
+  get allNeurons() {
+    return this.inputNeurons
       .concat(this.outputNeurons)
       .concat(this.hiddenNeurons);
+  }
 
-    const neuron = allNeurons.filter((n) => n.id === neuronID)[0];
-    const other = allNeurons.filter((n) => n.id === otherID)[0];
-    let maxConnections = this.inputNeurons.length * this.outputNeurons.length;
+  feedForward(data) {
+    for (let i = 1; i < this.numLayers; i++) {
+      const _layer = this.allNeurons.filter((neuron) => neuron.layer == i);
+      const layer_ = this.allNeurons.filter((neuron) => neuron.layer == i + 1);
+      this.connectLayers(_layer, layer_, data);
+    }
+    const onOrOff = this.connections.map((connection) => connection.enabled);
+    return onOrOff;
+  }
 
+  connectLayers = (_layer, layer_, data) => {
+    for (let i = 0; i < _layer.length; i++) {
+      for (let j = 0; j < layer_.length; j++) {
+        this.formConnection(_layer[i].id, layer_[j].id, data);
+      }
+    }
+  };
+
+  formConnection(neuronID, otherID, data) {
+    //now the problem is every connection is the same data.
+    //this is absurdly simple, there's 7 pieces of data, 7 input neurons, just apply each piece of data to each input neuron in order, only for input neurons first, why is this data being applied to output or hidden.
+    //step one apply in order each data to each input neuron, forget about connections for right nows
+
+    //now once input neurons have that data, when we make a new connection, we don't pass data, they form a connection first and have shared weight/bias. no data is passed to output neuron. step 2 is connect them all while data is only in input neuron layer 1.
+
+    //it's fine to store the data in the connectionPath, neuron type "input" will keep that data static. the next layer will programatically do something to that data by multiplying it by the weight and such, thus storing the next new data value. so first have input layer 1 store the initial data values in their connectionObj. or maybe don't bother, just have output receive those values and do the multiplication
+
+    //every new connection an input neuron makes, it stores that data that it already has in its connectedTo object.
+
+    //store initial data in input neurons first
     for (let i = 0; i < data.length; i++) {
-      const connectionPath = neuron.connect(other, data[i]);
+      this.inputNeurons[i].data = data[i];
+    }
+
+    //we update connection data by looping through all the input data which there is 7 total, then for each connectionObject we multiply the input data by the connectionObj's weight and add bias, that becomes the new data value of the connectionObj.
+
+    const neuron = this.allNeurons.filter((n) => n.id === neuronID)[0];
+
+    const other = this.allNeurons.filter((n) => n.id === otherID)[0];
+
+    const pathCheck = String(neuron.id + "," + other.id);
+    const neuronPaths = neuron.connectedTo.map((connection) => connection.path);
+    const isConnected = neuronPaths.some((path) => path == pathCheck);
+
+    if (!isConnected) {
+      const connectionPath = neuron.connect(other, neuron.data);
       this.connections.push(connectionPath);
     }
-    if (
-      this.connections.length > maxConnections ||
-      neuron.connectedTo.length > maxConnections ||
-      other.connectedTo.length > maxConnections
-    ) {
+
+    //next we make it so the outputNeurons receive the currentValue from the connection object, and then they multiply that currentValue by the next layer, rinse repeat until you get to the end, that's the algoritm
+
+    // but wait, how do they continue to receive a continuous stream of input if the connections are closed by the checK? processingSpeed can be a gene, whoa? or is this reactionTime
+    if (frameCount % 16 == 0) {
       this.connections = [];
       neuron.connectedTo = [];
       other.connectedTo = [];
     }
-  }
-  feedForward(data) {
-    // console.log(data);
-    // let numLayers = this.outputNeurons[0].layer;
-    // console.log(numLayers);
-    // const allNeurons = this.inputNeurons
-    //   .concat(this.outputNeurons)
-    //   .concat(this.hiddenNeurons);
-    // console.log(allNeurons);
-    // for(let i = 0; i < allNeurons.length; i++){
-    //   if(allNeurons[i].layer)
-    // }
+    //every time they receive new input, or we call processing speed of their brain, on certain amount of frames it updates information based on the information their sensors are picking up, the connections refresh
 
-    // noLoop();
-    const connectLayers = (level1, level2) => {
-      for (let i = 0; i < level1.length; i++) {
-        for (let j = 0; j < level2.length; j++) {
-          this.formConnection(level1[i].id, level2[j].id, data);
-        }
-      }
-    };
-    connectLayers(this.inputNeurons, this.hiddenNeurons);
-    connectLayers(this.hiddenNeurons, this.outputNeurons);
-
-    let allConnections = this.connections.map(
-      (connection) => connection.enabled
-    );
-    return allConnections;
-  }
-  getWeightedSum() {
-    const synapses = this.inputNeurons
-      .map((input) => input.connectedTo.map((connection) => connection.synapse))
-      .flat();
+    //but don't refresh everything to a clean slate, keep the same bias/weight, just update the data every x amount of frames
   }
 }
-
-// let brain1 = new Brain(5, 3, [2, 4]);
-// let brain2 = new Brain(5, 3, [2, 4]);
-// let brain3 = new Brain(2, 4, [3, 2]);
-// let brain4 = new Brain(8, 10);
-// let hivemind = new Hivemind([brain1, brain2, brain3, brain4]);
-
-// brain1.formConnection(2, 7);
-// brain1.formConnection(3, 9);
-// brain2.formConnection(4, 10);
-// brain2.formConnection(3, 9);
-// brain4.formConnection(7, 15);
-// brain3.formConnection(2, 7);
-// brain2.formConnection(6, 8);
-
-// brain1.getWeightedSum();
-
-// hivemind.checkNetworks();
-
-// console.log(brain1);
-
-// static feedForward(givenInputs, level) {
-//   for (let i = 0; i < level.inputs.length; i++) {
-//     level.inputs[i] = givenInputs[i];
-//   }
-//   for (let i = 0; i < level.outputs.length; i++) {
-//     let sum = 0;
-//     for (let j = 0; j < level.inputs.length; j++) {
-//       sum += level.inputs[j] * level.weights[j][i];
-//     }
-
-//     if (sum > level.biases[i]) {
-//       level.outputs[i] = 1;
-//     } else {
-//       level.outputs[i] = 0;
-//     }
-//   }
-//   return level.outputs;
-// }
 
 //**
 //make a check that if you input a connection of neurons that don't exist it just returns undefined instead of throwing an error. just log "neurons not available."

@@ -8,7 +8,7 @@ class Neuron {
   }
   connect(
     other,
-    data,
+    value,
     weight = Math.random() * 2 - 1,
     bias = Math.random() * 2 - 1
   ) {
@@ -18,10 +18,10 @@ class Neuron {
       bias: bias,
       types: [this.type, other.type],
       innovationNum: 0,
-      data: data,
-      enabled: data * weight + bias > 0 ? true : false,
+      currentValue: value * weight + bias,
+      enabled: value * weight + bias > 0 ? true : false,
     };
-    // if (this.type == "input") connection.enabled = true;
+
     this.connectedTo.push(connection);
     other.connectedTo.push(connection);
     return connection;

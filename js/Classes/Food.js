@@ -1,8 +1,9 @@
 class Food {
-  constructor(r, b, c) {
+  constructor(r, b, c, name) {
     this.rad = r;
     this.bound = b;
     this.col = c;
+    this.name = name;
     this.pos = createVector(
       random(this.bound, width - this.bound),
       random(this.bound, height - this.bound)

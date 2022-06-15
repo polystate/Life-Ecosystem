@@ -9,7 +9,7 @@ class Insect {
     this.acc = createVector(0, 0);
     this.mass = ceil(this.wid * this.hei + this.rad);
     this.sight = map(this.rad, 36, 72, 6, 9);
-    this.brain = new Brain(5, 4, [3]);
+    this.brain = new Brain(7, 4);
     this.energy = 16;
     this.health = this.energy / 2;
     this.col = col;
@@ -43,49 +43,65 @@ class Insect {
     this.arm(0.05, this.pos);
   }
 
-  brainStartup(foodLocArr) {
-    // let nearestFood = this.getNearestTarget(foodLocArr).copy();
+  brainStartup(foodLocArr, otherArr) {
+    const mapAndNormalize = (arr) => {
+      if (arr.length == 0) return [0, 0];
+      arr.flat(Infinity);
+      let nearestTarget = this.getNearestTarget(arr).copy();
+      let nearestX;
+      let nearestY;
+      if (!nearestTarget) {
+        nearestX = 0;
+        nearestY = 0;
+      } else {
+        nearestX = map(nearestTarget.x, 0, width, -1, 1);
+        nearestY = map(nearestTarget.y, 0, height, -1, 1);
+      }
 
-    // nearestFood.normalize();
+      return [nearestX, nearestY];
+    };
+    let berries = foodLocArr[0].map((e) => e.position);
+    let limes = foodLocArr[1].map((e) => e.position);
+    let otherPositions = otherArr.map((other) => other.pos);
+    for (let i = 0; i < otherPositions.length; i++) {
+      if (this.pos.dist(otherPositions[i]) == 0) {
+        otherPositions.splice(i, 1);
+      }
+    }
+    let foodPositions = foodLocArr.map((foodGroup) => {
+      return foodGroup.map((food) => {
+        return food.position;
+      });
+    });
 
     let positionX = map(this.pos.x, 0, width, -1, 1);
     let positionY = map(this.pos.y, 0, height, -1, 1);
-    let foodX;
-    let foodY;
-
-    if (foodLocArr.length == 0) {
-      foodX = createVector(0, 0);
-      foodY = createVector(0, 0);
-    } else {
-      foodX = map(foodLocArr[0][0][0].x, 0, width, -1, 1);
-      foodY = map(foodLocArr[0][0][0].y, 0, height, -1, 1);
-    }
     let energyMap = map(this.energy, 0, this.energy, -1, 1);
-    // let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
-
-    // let healthMap = map(this.health, 0, this.health, 0, 1);
-    // let massMap = map(this.mass, 0, 12000, -1, 1);
-    // let heightMap = map(this.hei, 0, 60, 0, 1);
-    // let widthMap = map(this.wid, 0, 200, 0, 1);
+    let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
+    let healthMap = map(this.health, 0, this.health, 0, 1);
+    let massMap = map(this.mass, 0, 12000, -1, 1);
+    let heightMap = map(this.hei, 0, 60, 0, 1);
+    let widthMap = map(this.wid, 0, 200, 0, 1);
     // let radMap = map(this.rad, 0, 72, 0, 1);
 
+    //feeding forward a singular value, not an array of two values
     let outputs = this.brain.feedForward([
       positionX,
       positionY,
-      foodX,
-      foodY,
       energyMap,
+      mapAndNormalize(foodPositions[0])[0],
+      mapAndNormalize(foodPositions[0])[1],
+      mapAndNormalize(foodPositions[1])[0],
+      mapAndNormalize(foodPositions[1])[1],
     ]);
 
     return outputs;
   }
 
-  update(foodLocArr, otherArr = null, predator = null) {
+  update(foodLocArr, otherArr, predator = null) {
     this.eye("lightblue", this.sight);
-    // let outputs = this.brain.feedForward([this.pos.x, this.pos.y]);
-    // this.movement(outputs);
 
-    this.movement(this.brainStartup(foodLocArr));
+    this.movement(this.brainStartup(foodLocArr, otherArr));
 
     if (this.hasEnergy()) {
       this.lifespan++;
@@ -116,6 +132,10 @@ class Insect {
     if (outputs[3]) {
       this.applyForce(createVector(1, 0));
     }
+
+    // if (outputs[4]) {
+    //   this.applyForce(this.seek(createVector(width / 2, height / 2)));
+    // }
   }
 
   applyBehaviors(foodLocArr, otherArr, predator) {
@@ -189,10 +209,9 @@ class Insect {
   }
 
   getNearestTarget(vectorArr) {
-    vectorArr = vectorArr.flat();
-
+    // vectorArr = vectorArr.flat();
+    // console.log(vectorArr);
     let nearest = vectorArr.map((vect) => this.pos.dist(vect));
-
     nearest = nearest.indexOf(Math.min(...nearest));
 
     return vectorArr[nearest];
