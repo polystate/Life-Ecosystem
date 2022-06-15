@@ -118,6 +118,7 @@ class Population {
 
       //child's brain not initialized yet
       if (this.arr.length < this.total) {
+        // if (this.arr.length == 0) newChild.brain = this.bestSpecie.brain;
         this.arr.push(newChild);
       }
     }

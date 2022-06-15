@@ -10,7 +10,7 @@ class Insect {
     this.mass = ceil(this.wid * this.hei + this.rad);
     this.sight = map(this.rad, 36, 72, 6, 9);
     this.brain = new Brain(7, 4);
-    this.energy = 16;
+    this.energy = 8;
     this.health = this.energy / 2;
     this.col = col;
     this.alp = alpha;

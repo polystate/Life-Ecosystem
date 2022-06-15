@@ -5,12 +5,32 @@ class Neuron {
     this.type = type;
     this.connectedTo = [];
     this.data = [];
+    this.storage = [];
   }
+
+  currentWeight() {
+    if (!this.storage.length) {
+      return Math.random() * 2 - 1;
+    } else {
+      return this.storage[0];
+    }
+
+    return Math.random() * 2 - 1;
+  }
+
+  currentBias() {
+    if (!this.storage.length) {
+      return Math.random() * 2 - 1;
+    } else return this.storage[1];
+
+    return Math.random() * 2 - 1;
+  }
+
   connect(
     other,
     value,
-    weight = Math.random() * 2 - 1,
-    bias = Math.random() * 2 - 1
+    weight = this.currentWeight(),
+    bias = this.currentBias()
   ) {
     const connection = {
       path: `${this.id},${other.id}`,
@@ -24,6 +44,18 @@ class Neuron {
 
     this.connectedTo.push(connection);
     other.connectedTo.push(connection);
+
+    // if (this.storage.length <= 4) {
+    //   this.storage.push(connection.weight, connection.bias);
+    // } else {
+    //   this.storage = [];
+    // }
+    // if (other.storage.length <= 4) {
+    //   other.storage.push(connection.weight, connection.bias);
+    // } else {
+    //   other.storage = [];
+    // }
+
     return connection;
   }
 }

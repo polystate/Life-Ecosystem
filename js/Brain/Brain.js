@@ -6,6 +6,8 @@ class Brain {
     this.inputNeurons = [];
     this.outputNeurons = [];
     this.hiddenNeurons = [];
+    this.previousWeights = [];
+    this.previousBiases = [];
     this.connections = [];
 
     //Input Layer
@@ -59,13 +61,28 @@ class Brain {
       .concat(this.hiddenNeurons);
   }
 
+  processOutputValues() {
+    let sums = [];
+    const currentValues = this.outputNeurons.map((neuron) =>
+      neuron.connectedTo.map((path) => path.currentValue)
+    );
+
+    for (let values of currentValues) {
+      sums.push(sigmoid(values.reduce((a, b) => a + b, 0)));
+    }
+
+    return sums;
+  }
+
   feedForward(data) {
     for (let i = 1; i < this.numLayers; i++) {
       const _layer = this.allNeurons.filter((neuron) => neuron.layer == i);
       const layer_ = this.allNeurons.filter((neuron) => neuron.layer == i + 1);
       this.connectLayers(_layer, layer_, data);
     }
-    const onOrOff = this.connections.map((connection) => connection.enabled);
+    const onOrOff = this.processOutputValues().map((value) =>
+      value >= 0.5 ? true : false
+    );
     return onOrOff;
   }
 
@@ -78,48 +95,37 @@ class Brain {
   };
 
   formConnection(neuronID, otherID, data) {
-    //now the problem is every connection is the same data.
-    //this is absurdly simple, there's 7 pieces of data, 7 input neurons, just apply each piece of data to each input neuron in order, only for input neurons first, why is this data being applied to output or hidden.
-    //step one apply in order each data to each input neuron, forget about connections for right nows
-
-    //now once input neurons have that data, when we make a new connection, we don't pass data, they form a connection first and have shared weight/bias. no data is passed to output neuron. step 2 is connect them all while data is only in input neuron layer 1.
-
-    //it's fine to store the data in the connectionPath, neuron type "input" will keep that data static. the next layer will programatically do something to that data by multiplying it by the weight and such, thus storing the next new data value. so first have input layer 1 store the initial data values in their connectionObj. or maybe don't bother, just have output receive those values and do the multiplication
-
-    //every new connection an input neuron makes, it stores that data that it already has in its connectedTo object.
-
-    //store initial data in input neurons first
-    for (let i = 0; i < data.length; i++) {
-      this.inputNeurons[i].data = data[i];
+    // console.log(this.inputNeurons);
+    // console.log(neuronID);
+    // noLoop();
+    if (neuronID > this.inputNeurons.length) {
+      for (let i = 0; i < data.length; i++) {
+        this.inputNeurons[i].data = data[i];
+      }
     }
 
-    //we update connection data by looping through all the input data which there is 7 total, then for each connectionObject we multiply the input data by the connectionObj's weight and add bias, that becomes the new data value of the connectionObj.
-
     const neuron = this.allNeurons.filter((n) => n.id === neuronID)[0];
-
     const other = this.allNeurons.filter((n) => n.id === otherID)[0];
-
-    const pathCheck = String(neuron.id + "," + other.id);
     const neuronPaths = neuron.connectedTo.map((connection) => connection.path);
-    const isConnected = neuronPaths.some((path) => path == pathCheck);
+    const isConnected = neuronPaths.some(
+      (path) => path == String(neuron.id + "," + other.id)
+    );
 
     if (!isConnected) {
       const connectionPath = neuron.connect(other, neuron.data);
       this.connections.push(connectionPath);
     }
 
-    //next we make it so the outputNeurons receive the currentValue from the connection object, and then they multiply that currentValue by the next layer, rinse repeat until you get to the end, that's the algoritm
-
-    // but wait, how do they continue to receive a continuous stream of input if the connections are closed by the checK? processingSpeed can be a gene, whoa? or is this reactionTime
     if (frameCount % 16 == 0) {
-      this.connections = [];
       neuron.connectedTo = [];
       other.connectedTo = [];
+      this.connections = [];
     }
-    //every time they receive new input, or we call processing speed of their brain, on certain amount of frames it updates information based on the information their sensors are picking up, the connections refresh
-
-    //but don't refresh everything to a clean slate, keep the same bias/weight, just update the data every x amount of frames
   }
+}
+
+function sigmoid(z) {
+  return 1 / (1 + Math.exp(-z));
 }
 
 //**
