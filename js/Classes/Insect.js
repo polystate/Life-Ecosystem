@@ -77,11 +77,11 @@ class Insect {
     let positionX = map(this.pos.x, 0, width, -1, 1);
     let positionY = map(this.pos.y, 0, height, -1, 1);
     let energyMap = map(this.energy, 0, this.energy, -1, 1);
-    let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
-    let healthMap = map(this.health, 0, this.health, 0, 1);
-    let massMap = map(this.mass, 0, 12000, -1, 1);
-    let heightMap = map(this.hei, 0, 60, 0, 1);
-    let widthMap = map(this.wid, 0, 200, 0, 1);
+    // let maxSpeedMap = map(this.maxSpeed, 0, this.energy, 0, 1);
+    // let healthMap = map(this.health, 0, this.health, 0, 1);
+    // let massMap = map(this.mass, 0, 12000, -1, 1);
+    // let heightMap = map(this.hei, 0, 60, 0, 1);
+    // let widthMap = map(this.wid, 0, 200, 0, 1);
     // let radMap = map(this.rad, 0, 72, 0, 1);
 
     //feeding forward a singular value, not an array of two values
@@ -89,10 +89,10 @@ class Insect {
       positionX,
       positionY,
       energyMap,
-      mapAndNormalize(foodPositions[0])[0],
-      mapAndNormalize(foodPositions[0])[1],
-      mapAndNormalize(foodPositions[1])[0],
-      mapAndNormalize(foodPositions[1])[1],
+      // mapAndNormalize(foodPositions[0])[0],
+      // mapAndNormalize(foodPositions[0])[1],
+      // mapAndNormalize(foodPositions[1])[0],
+      // mapAndNormalize(foodPositions[1])[1],
     ]);
 
     return outputs;

@@ -98,10 +98,16 @@ class Brain {
     // console.log(this.inputNeurons);
     // console.log(neuronID);
     // noLoop();
-    if (neuronID > this.inputNeurons.length) {
-      for (let i = 0; i < data.length; i++) {
-        this.inputNeurons[i].data = data[i];
-      }
+    // if (neuronID > this.inputNeurons.length) {
+    //   for (let i = 0; i < data.length; i++) {
+    //     this.inputNeurons[i].data = data[i];
+    //   }
+    // }
+
+    //restructure it so that the neurons and their connections stay the same, but the only thing that changes is the incoming data
+
+    for (let i = 0; i < data.length; i++) {
+      this.inputNeurons[i].data = data[i];
     }
 
     const neuron = this.allNeurons.filter((n) => n.id === neuronID)[0];
@@ -111,16 +117,17 @@ class Brain {
       (path) => path == String(neuron.id + "," + other.id)
     );
 
+    //the data is staying stagnant because connections were already made
     if (!isConnected) {
       const connectionPath = neuron.connect(other, neuron.data);
       this.connections.push(connectionPath);
     }
 
-    if (frameCount % 16 == 0) {
-      neuron.connectedTo = [];
-      other.connectedTo = [];
-      this.connections = [];
-    }
+    // if (frameCount % 16 == 0) {
+    //   neuron.connectedTo = [];
+    //   other.connectedTo = [];
+    //   this.connections = [];
+    // }
   }
 }
 

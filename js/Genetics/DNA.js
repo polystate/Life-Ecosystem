@@ -13,7 +13,7 @@ class DNA {
     lifespan = map(lifespan, 0, worldRecord, 0, 1);
     bitesTaken = map(bitesTaken, 0, maxBitesTaken, 0, 1);
 
-    return lifespan;
+    return bitesTaken;
   }
   crossover(partner) {
     let child = new DNA();

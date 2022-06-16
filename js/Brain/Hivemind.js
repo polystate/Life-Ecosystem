@@ -3,6 +3,7 @@ class Hivemind {
     this.allBrains = allBrains;
     this.innovationNum = 0;
   }
+  //try mutating the weights and biases here randomly to get them to move more dynamically, innovationNum no longer assigning
   get allNeurons() {
     return this.allBrains
       .map((brain) =>
@@ -12,6 +13,12 @@ class Hivemind {
       )
       .flat();
   }
+  // get allConnections() {
+  //   // let connections = this.allNeurons.map((neuron) => neuron.connectedTo);
+  //   // console.log(connections);
+  //   // console.log(connections.map((path) => path));
+  //   console.log(this.pathNeurons);
+  // }
   get pathNeurons() {
     return this.allNeurons
       .filter((neuron) => neuron.connectedTo.length)
@@ -44,6 +51,11 @@ class Hivemind {
 
   checkNetworks() {
     this.assignInnovation();
+
+    // let filterTwo = this.pathNeurons.filter((path) => path.innovationNum == 2);
+    // filterTwo = filterTwo.map((innovationNum) => (innovationNum.weight = 0.2));
+    // console.log(filterTwo);
+
     // this.updateCopies();
   }
 
