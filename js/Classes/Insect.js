@@ -89,7 +89,7 @@ class Insect {
       positionX,
       positionY,
       energyMap,
-      // mapAndNormalize(foodPositions[0])[0],
+      mapAndNormalize(foodPositions[0])[0],
       // mapAndNormalize(foodPositions[0])[1],
       // mapAndNormalize(foodPositions[1])[0],
       // mapAndNormalize(foodPositions[1])[1],

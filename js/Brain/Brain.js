@@ -61,6 +61,12 @@ class Brain {
       .concat(this.hiddenNeurons);
   }
 
+  allPaths() {
+    return this.connections.map((connection) => {
+      return connection.path;
+    });
+  }
+
   processOutputValues() {
     let sums = [];
     const currentValues = this.outputNeurons.map((neuron) =>
@@ -113,10 +119,10 @@ class Brain {
     const neuron = this.allNeurons.filter((n) => n.id === neuronID)[0];
     const other = this.allNeurons.filter((n) => n.id === otherID)[0];
     const neuronPaths = neuron.connectedTo.map((connection) => connection.path);
+
     const isConnected = neuronPaths.some(
       (path) => path == String(neuron.id + "," + other.id)
     );
-
     //the data is staying stagnant because connections were already made
     if (!isConnected) {
       const connectionPath = neuron.connect(other, neuron.data);
