@@ -35,7 +35,7 @@ class FoodGroup {
   applyAttribute(specie) {
     switch (this.name) {
       case "Berry":
-        specie.energy += 2;
+        specie.energy -= 1;
       case "Lime":
         specie.energy += 2;
     }

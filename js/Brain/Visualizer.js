@@ -62,20 +62,49 @@ const Visualizer = (() => {
           (connection) => connection.enabled
         );
 
+        let connectionWeight = specie.brain.connections.map(
+          (connection) => connection.weight
+        );
+
+        // console.log(specie.brain.connections);
+
+        // console.log(inputNodesPos);
+        // console.log(outputNodesPos);
+
+        // p5.noLoop();
+
+        //draw ID on each node as number so we can see what's going on
+        let connectionIndex = 0;
         //connect nodes visually
         for (let i = 0; i < inputNodesPos.length; i++) {
           for (let j = 0; j < outputNodesPos.length; j++) {
-            let currentColor = isConnected[i] ? "yellow" : bgcolor;
-            p5.push();
-            p5.stroke(currentColor);
-            p5.strokeWeight(0.01);
-            p5.line(
-              inputNodesPos[i][0],
-              inputNodesPos[i][1],
-              outputNodesPos[j][0],
-              outputNodesPos[j][1]
+            let currentColor = isConnected[connectionIndex]
+              ? "yellow"
+              : bgcolor;
+            let currentWeight = map(
+              connectionWeight[connectionIndex],
+              -1,
+              1,
+              0,
+              1
             );
-            p5.pop();
+
+            connectionIndex++;
+
+            if (currentColor !== bgcolor) {
+              p5.push();
+              p5.stroke(
+                lerpColor(color(0, 0, 0), color(150, 150, 0), currentWeight)
+              );
+              // p5.strokeWeight(0.01);
+              p5.line(
+                inputNodesPos[i][0],
+                inputNodesPos[i][1],
+                outputNodesPos[j][0],
+                outputNodesPos[j][1]
+              );
+              p5.pop();
+            }
           }
         }
       };
@@ -104,25 +133,25 @@ const Visualizer = (() => {
               x,
               y,
               relativeWidth - offset,
-              nodeBG,
               round(nodes[i].data, 2),
-              startEndGap
+              startEndGap,
+              i
             )
           );
           x += relativeWidth;
         }
         return nodePosArr;
       };
-      const createNode = (x, y, diam, charge, data, startEndGap) => {
+      const createNode = (x, y, diam, data, startEndGap, index) => {
         let currentColor = p5.map(data, -1, 1, 0, 255);
         p5.push();
         p5.fill(currentColor);
         p5.circle(x + diam / 2 + startEndGap, y, diam);
-        // p5.fill(currentColor);
+        // p5.fill("orange");
         // p5.textSize(diam / 4);
-        // p5.text(data, x + diam / 2 + startEndGap, y);
+        // p5.text(index + 1, x + diam / 2 + startEndGap, y);
         p5.pop();
-        return [x + diam / 2 + startEndGap, y];
+        return [x + diam / 2 + startEndGap, y, index + 1];
       };
     };
     new p5(newSketch);

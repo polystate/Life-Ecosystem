@@ -129,11 +129,11 @@ class Brain {
       this.connections.push(connectionPath);
     }
 
-    // if (frameCount % 16 == 0) {
-    //   neuron.connectedTo = [];
-    //   other.connectedTo = [];
-    //   this.connections = [];
-    // }
+    if (frameCount % 16 == 0) {
+      neuron.connectedTo = [];
+      other.connectedTo = [];
+      this.connections = [];
+    }
   }
 }
 
